@@ -1,0 +1,49 @@
+! ****************************************************
+!   FRANK MANU
+!   SPRING 2020
+!   EECE.5200 - COMPUTER AIDED ENGINEERING ANAYLSIS
+!	REF: DR. THOMPSON
+!   PROBLEM SET 4 - PART 2
+! ****************************************************
+
+	IMPLICIT NONE
+	INTEGER,PARAMETER :: N=512
+	REAL ::X(0:N-1)
+	COMPLEX :: Y(0:N-1)
+
+	REAL TPI,FC,WC,T,BETA,A1,B,B1
+	REAL FREQ,HMAG_WARPED,HMAG_NONWARPED
+	REAL W_D,FREQ_C,FREQ_D
+	INTEGER I
+
+	TPI=2*ACOS(-1.0)
+	FC = 1000.0
+	WC = TPI*FC
+	T = 1.0/10000
+
+	BETA = WC*T/2.0
+	A1 = -(BETA-1)/(BETA+1)
+	B  = BETA/(1+BETA)
+	B1 = BETA/(1+BETA)
+
+	X(:)=0
+	Y(:)=0
+
+	X(0)=1.0
+	Y(0)= B*X(0)
+	DO I=1,N-1
+		Y(I) = A1*Y(I-1) + B*X(I)+B1*X(I-1) 
+	ENDDO
+
+	CALL FFT(Y,N,0)
+
+	DO I=0,N/2
+		FREQ_D = I*(1.0/T)/N
+		W_D = TPI*FREQ_D
+		FREQ_C = 2/(T*TPI)    *TAN(W_D*T/2)
+		HMAG_WARPED = 1/SQRT( (FREQ_C/FC)**2 +1 )
+		HMAG_NONWARPED = 1/SQRT( (FREQ_D/FC)**2+1)
+		WRITE(*,*) FREQ_D,ABS(Y(I)),HMAG_WARPED,HMAG_NONWARPED
+	ENDDO
+
+	END
